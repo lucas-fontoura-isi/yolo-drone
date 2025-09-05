@@ -173,4 +173,10 @@ poetry.toml
 # LSP config files
 pyrightconfig.json
 
+# Pytorch weights
+*.pt
+
+# Ultralytics runs
+runs/
+
 # End of https://www.toptal.com/developers/gitignore/api/python
