@@ -20,7 +20,7 @@ def clean_infected_leaves(
     reassign_annotation_ids: bool,
     keep_original_ids: bool,
     keep_original_fname: bool
-):
+) -> None:
     # Path and I/O checks
     if not input_json.is_file():
         raise FileNotFoundError(f"Input JSON file not found: {input_json}")
@@ -132,7 +132,7 @@ def clean_infected_leaves(
         print(f"Dropped small annotation ids (examples): {dropped_small_annotations[:10]}")
     print(f"✅ Rescaled bboxes saved to {output_json}")
 
-def convert_yolo_to_coco(coco_json: Path, images_folder: Path, output_folder: Path, train_ratio: float, use_sahi: bool):
+def convert_yolo_to_coco(coco_json: Path, images_folder: Path, output_folder: Path, train_ratio: float, use_sahi: bool) -> None:
     # Path and I/O checks
     output_folder = output_folder
     images_folder = images_folder

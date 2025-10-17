@@ -71,7 +71,7 @@ def get_args() -> argparse.Namespace:
 
     return parser.parse_args()
 
-def main():
+def main() -> None:
     args = get_args()
     clean_infected_leaves(**vars(args))
 

@@ -2,7 +2,7 @@ import argparse
 from pathlib import Path
 from yolo_drone.src.slicing import slice_coco_dataset
 
-def parse_args():
+def parse_args() -> argparse.Namespace:
     """Parse CLI arguments."""
     parser = argparse.ArgumentParser(
         description="Uses SAHI to slice COCO dataset images.",
@@ -68,7 +68,7 @@ def parse_args():
 
     return parser.parse_args()
 
-def main():
+def main() -> None:
     args = parse_args()
     slice_coco_dataset(**vars(args))
 

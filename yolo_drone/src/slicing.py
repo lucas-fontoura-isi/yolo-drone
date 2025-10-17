@@ -25,7 +25,7 @@ def slice_coco_dataset(
     ignore_negative_samples: bool,
     output_coco_annotation_file_name: str,
     output_dir: str
-):
+) -> None:
     # Path and I/O checks
     if not coco_annotation_file_path.is_file():
         raise FileNotFoundError(f"COCO annotation file not found: {coco_annotation_file_path}")
