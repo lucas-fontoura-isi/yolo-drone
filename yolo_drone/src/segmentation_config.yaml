@@ -1,0 +1,21 @@
+color_ranges:
+  - lower: [238, 56, 80]
+    upper: [240, 58, 82]
+    class_name: grape
+  - lower: [7, 84, 85]
+    upper: [8, 85, 86]
+    class_name: black_rot
+  - lower: [25, 74, 82]
+    upper: [27, 76, 84]
+    class_name: esca
+  - lower: [252, 55, 81]
+    upper: [253, 56, 82]
+    class_name: downy_mildew
+  - lower: [340, 63, 83]
+    upper: [341, 64, 84]
+    class_name: powdery_mildew
+  - lower: [55, 46, 78]
+    upper: [56, 47, 79]
+    class_name: leaf_blight
+
+num_samples_for_visualization: 20
