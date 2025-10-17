@@ -1,0 +1,34 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "yolo_drone"
+version = "0.1.dev0"
+dependencies = [
+    "ipykernel>=6.30.1",
+    "clearml>=2.0.2",
+    "ultralytics>=8.3.193",
+    "sahi>=0.11.34"
+]
+requires-python = ">=3.11"
+description = "Code developed during Yolo Drone paper project."
+authors = [{ name = "Lucas Fontoura", email = "lucas.fontoura@senairs.org.br" }]
+license = { text = "Unlicense" }
+readme = "README.md"
+
+[project.scripts]
+clean-infected-leaves = "yolo_drone.scripts.clean_infected_leaves:main"
+convert-coco-to-yolo = "yolo_drone.scripts.convert_coco_to_yolo:main"
+slice-coco-sahi = "yolo_drone.scripts.slice_coco_sahi:main"
+slice-yolo-farinati = "yolo_drone.scripts.slice_yolo_farinati:main"
+
+[tool.setuptools]
+py-modules = []
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["yolo_drone*"]
+
+[tool.black]
+target-version = ["py311"]
