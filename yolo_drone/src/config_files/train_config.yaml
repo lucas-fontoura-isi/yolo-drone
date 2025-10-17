@@ -1,0 +1,8 @@
+model: 'yolo12n.pt'
+epochs: 10
+imgsz: 640
+device: 'cuda'
+batch: 16
+seed: 42
+project: 'runstest'
+name: 'test'

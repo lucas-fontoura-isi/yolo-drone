@@ -5,7 +5,7 @@ from tqdm import tqdm
 from pathlib import Path
 
 # Load configuration file
-CONFIG_PATH = Path(__file__).parent / "segmentation_config.yaml"
+CONFIG_PATH = Path(__file__).parent / "config_files" / "segmentation_config.yaml"
 with open(CONFIG_PATH, "r") as f:
     config = yaml.safe_load(f)
 
