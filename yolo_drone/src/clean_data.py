@@ -242,3 +242,21 @@ def convert_yolo_to_coco(coco_json: Path, images_folder: Path, output_folder: Pa
             output_dir=output_folder,
             train_split_rate=train_ratio
         )
+
+def create_yolo_splits(images_dir: Path, output_dir: Path, img_extension: str, train_ratio: float) -> None:
+    if not images_dir.is_dir():
+        raise NotADirectoryError(f"Images directory not found: {images_dir}")
+    
+    images = list(images_dir.glob(f"*{img_extension}"))
+    random.shuffle(images)
+
+    train_idx = int(len(images) * train_ratio)
+
+    train_images = images[:train_idx]
+    val_images = images[train_idx:]
+
+    output_dir.mkdir(exist_ok=True)
+    with open(output_dir / "train.txt", "w") as f:
+        f.write("\n".join(str(p) for p in train_images))
+    with open(output_dir / "val.txt", "w") as f:
+        f.write("\n".join(str(p) for p in val_images))

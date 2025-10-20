@@ -24,6 +24,7 @@ slice-coco-sahi = "yolo_drone.scripts.slice_coco_sahi:main"
 slice-yolo-farinati = "yolo_drone.scripts.slice_yolo_farinati:main"
 segment-synthetic = "yolo_drone.scripts.segment_synthetic:main"
 train-yolo = "yolo_drone.scripts.train_yolo:main"
+create-yolo-splits = "yolo_drone.scripts.create_yolo_splits:main"
 
 [tool.setuptools]
 py-modules = []
