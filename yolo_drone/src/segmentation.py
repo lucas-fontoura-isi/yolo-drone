@@ -16,15 +16,27 @@ def convert_hsv_gimp_to_cv2(H_gimp: int, S_gimp: int, V_gimp: int) -> tuple[int,
     return (H_cv2, S_cv2, V_cv2)
 
 
-def segment_synthetic(images_dir: Path, labels_dir: Path, convert_gimphsv_to_cv2hsv: bool, min_area: int, epsilon_ratio: float, draw_segmentation: bool) -> None:
+def segment_synthetic(
+        images_dir: Path,
+        labels_dir: Path,
+        convert_gimphsv_to_cv2hsv: bool,
+        min_area: int,
+        epsilon_ratio: float,
+        draw_segmentation: bool,
+        detection_task: bool
+    ) -> None:
     # Path and I/O checks
     if not images_dir.is_dir():
         raise NotADirectoryError(f"Images directory not found: {images_dir}")
 
+    # To select the correct range
+    if detection_task: color_ranges_config = "color_ranges_gray"
+    else: color_ranges_config = "color_ranges"
+
     # Load color ranges from config
     color_ranges = [
         (tuple(item["lower"]), tuple(item["upper"]), tuple(item["class_name"]))
-        for item in config["color_ranges"]
+        for item in config[color_ranges_config]
     ]
 
     # Map class names to YOLO IDs
@@ -57,31 +69,46 @@ def segment_synthetic(images_dir: Path, labels_dir: Path, convert_gimphsv_to_cv2
                 if area < min_area:
                     continue
 
-                # Simplify polygon
-                epsilon = epsilon_ratio * cv2.arcLength(cnt, True)
-                approx = cv2.approxPolyDP(cnt, epsilon, True)
-
-                if len(approx) < 3:
-                    continue
-
-                # Normalize segmentation points
-                norm_points = []
-                for [x, y] in approx.reshape(-1, 2):
-                    px = x / w
-                    py = y / h
-                    norm_points.extend([px, py])
-
                 class_id = class_to_id[name]
-                line = f"{class_id} " + " ".join(f"{p:.6f}" for p in norm_points)
+                
+                if detection_task:
+                    # Bounding box
+                    x, y, bw, bh = cv2.boundingRect(cnt)
+
+                    # Normalize for YOLO
+                    x_center = (x + bw / 2) / w
+                    y_center = (y + bh / 2) / h
+                    norm_bw = bw / w
+                    norm_bh = bh / h
+
+                    line = f"{class_id} {x_center:.6f} {y_center:.6f} {norm_bw:.6f} {norm_bh:.6f}"
+                else:
+                    # Segmentation
+                    epsilon = epsilon_ratio * cv2.arcLength(cnt, True)
+                    approx = cv2.approxPolyDP(cnt, epsilon, True)
+
+                    if len(approx) < 3:
+                        continue
+
+                    # Normalize segmentation points
+                    norm_points = []
+                    for [x, y] in approx.reshape(-1, 2):
+                        px = x / w
+                        py = y / h
+                        norm_points.extend([px, py])
+
+                    line = f"{class_id} " + " ".join(f"{p:.6f}" for p in norm_points)
+
                 label_lines.append(line)
 
-        # Save YOLO-Seg labels
+        # Save YOLO labels
         if label_lines:
             label_path = labels_dir / (img_file.stem + ".txt")
             with open(label_path, "w") as f:
                 f.write("\n".join(label_lines))
 
-    print(f"✅ Done! YOLO-Seg annotations saved in {labels_dir}")
+    if detection_task: print(f"✅ Done! YOLO detection annotations saved in {labels_dir}")
+    else: print(f"✅ Done! YOLO-Seg annotations saved in {labels_dir}")
 
     if draw_segmentation:
         output_dir = labels_dir / "segmented_output"
@@ -89,10 +116,14 @@ def segment_synthetic(images_dir: Path, labels_dir: Path, convert_gimphsv_to_cv2
 
         for img_file in sorted(images_dir.glob("*.*"))[:config["num_samples_for_visualization"]]:
             label_file = labels_dir / (img_file.stem + ".txt")
-            visualize_yolo_seg(img_file, label_file, output_dir)
+            visualize_yolo_seg(img_file, label_file, output_dir, detection_task=detection_task)
 
 
-def visualize_yolo_seg(img_path: Path, label_path: Path, output_dir: Path) -> None:
+def visualize_yolo_seg(img_path: Path, label_path: Path, output_dir: Path, detection_task: bool) -> None:
+    # To select the correct range
+    if detection_task: color_ranges_config = "color_ranges_gray"
+    else: color_ranges_config = "color_ranges"
+
     img = cv2.imread(str(img_path))
     if img is None:
         print(f"⚠ Could not read {img_path}")
@@ -110,23 +141,41 @@ def visualize_yolo_seg(img_path: Path, label_path: Path, output_dir: Path) -> No
     for line in lines:
         parts = line.split()
         cls_id = int(parts[0])
-        coords = list(map(float, parts[1:]))
 
-        # Convert normalized coords back to pixel values
-        points = []
-        for i in range(0, len(coords), 2):
-            x = int(coords[i] * w)
-            y = int(coords[i + 1] * h)
-            points.append([x, y])
+        if detection_task:
+            # Bounding box
+            x_center, y_center, bw, bh = map(float, parts[1:])
 
-        points = cv2.convexHull(np.array(points))  # ensure closed polygon
-        cv2.polylines(img, [points], isClosed=True, color=(0, 255, 0), thickness=2)
+            # Convert normalized → pixel coordinates
+            x = int((x_center - bw / 2) * w)
+            y = int((y_center - bh / 2) * h)
+            bw_px = int(bw * w)
+            bh_px = int(bh * h)
 
-        # Label with class name
-        cx, cy = points[0][0]
-        cv2.putText(img, config["color_ranges"][cls_id]["class_name"], (cx, cy - 5),
-                    cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 0), 2)
+            cv2.rectangle(img, (x, y), (x + bw_px, y + bh_px), (0, 255, 0), 2)
+            cv2.putText(img, config[color_ranges_config][cls_id]["class_name"], (x, y - 5),
+                        cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 0), 2)
+
+        else:
+            # Segmentation
+            coords = list(map(float, parts[1:]))
+
+            # Convert normalized coords back to pixel values
+            points = []
+            for i in range(0, len(coords), 2):
+                x = int(coords[i] * w)
+                y = int(coords[i + 1] * h)
+                points.append([x, y])
+
+            points = cv2.convexHull(np.array(points))  # ensure closed polygon
+            cv2.polylines(img, [points], isClosed=True, color=(0, 255, 0), thickness=2)
+
+            # Label with class name
+            cx, cy = points[0][0]
+            cv2.putText(img, config[color_ranges_config][cls_id]["class_name"], (cx, cy - 5),
+                        cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 0), 2)
 
     out_path = output_dir / img_path.name
     cv2.imwrite(str(out_path), img)
     print(f"✅ Saved visualization to {out_path}")
+    

@@ -45,6 +45,12 @@ def parse_args() -> argparse.Namespace:
         action="store_true",
         help="If set, will draw segmentation masks on the images in a new directory called 'segmented_output'."
     )
+    parser.add_argument(
+        "-dt",
+        "--detection_task",
+        action="store_true",
+        help="If set, will return bounding box masks, instead of segmentation ones."
+    )
 
 
     return parser.parse_args()

@@ -18,4 +18,24 @@ color_ranges:
     upper: [56, 47, 79]
     class_name: leaf_blight
 
+color_ranges_gray:
+  - lower: [0, 0, 19]
+    upper: [0, 0, 20]
+    class_name: healthy
+  - lower: [0, 0, 35]
+    upper: [0, 0, 36]
+    class_name: black_rot
+  - lower: [0, 0, 66]
+    upper: [0, 0, 67]
+    class_name: esca
+  - lower: [0, 0, 51]
+    upper: [0, 0, 52]
+    class_name: downy_mildew
+  - lower: [0, 0, 82]
+    upper: [0, 0, 83]
+    class_name: powdery_mildew
+  - lower: [0, 0, 98]
+    upper: [0, 0, 99]
+    class_name: leaf_blight
+
 num_samples_for_visualization: 20

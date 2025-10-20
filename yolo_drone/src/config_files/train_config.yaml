@@ -1,8 +1,8 @@
-model: 'yolo12n.pt'
-epochs: 10
+model: '/home/lucas-fontoura/Documents/yolo-drone/runs/bage_reanotated/experiment_24/weights/best.pt'
+epochs: 100
 imgsz: 640
 device: 'cuda'
 batch: 16
 seed: 42
-project: 'runstest'
-name: 'test'
+project: 'runs/bage_reanotated'
+name: 'experiment_2'
