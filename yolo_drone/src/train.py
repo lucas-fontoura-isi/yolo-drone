@@ -19,7 +19,8 @@ def train_yolo(data: Path) -> None:
         batch=config["batch"],
         seed=config["seed"],
         project=config["project"],
-        name=config["name"]
+        name=config["name"],
+        save_period=config["save_period"]
     )
 
     print(results)
